@@ -4,7 +4,7 @@ class Parser:
     def __init__(self, filename):
         self.all_lines = []
         self.filename = filename
-        self.file_title = filename.split(".")[0]
+        self.file_title = filename.split("/")[-1].split(".")[0]
 
     def title(self):
         return self.file_title
