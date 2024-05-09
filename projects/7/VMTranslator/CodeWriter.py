@@ -8,6 +8,11 @@ class CodeWriter:
         with open(f"{self.file_title}.asm", 'w'):
             pass
 
+    def setFileName(self):
+        pass
+    def writeInit(self):
+        pass
+
     def writen_format(self, command_description, asm_commands):
         with open(f"{self.file_title}.asm", "a") as asm_file:
             asm_file.write(f"// {command_description}\n")
@@ -18,16 +23,16 @@ class CodeWriter:
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
                 if type_of_command == "CMD_ARITHMETIC":
-                    self.writen_format(full_command, self.arithmetic(full_command))
+                    self.writen_format(full_command, self.writeArithmetic(full_command))
 
                 elif type_of_command in ["CMD_PUSH", "CMD_POP"]:
                     action, segment, index = full_command.split(" ")[0:]
-                    self.writen_format(full_command, self.push_pop(action, segment, index))
+                    self.writen_format(full_command, self.writePushPop(action, segment, index))
 
                 elif type_of_command in ["CMD_COMMENTS", "CMD_BREAKLINE"]:
                     continue
 
-    def arithmetic(self, cmd_arithmetic):
+    def writeArithmetic(self, cmd_arithmetic):
         if cmd_arithmetic == "add":
             return ["@SP",'M=M-1', 'A=M', 'D=M', 'A=A-1','M=D+M'] 
         elif cmd_arithmetic == "sub":
@@ -52,7 +57,7 @@ class CodeWriter:
         else:
             raise ValueError("Arithmetic or logic command error ") 
 
-    def push_pop(self, action, segment, index):   
+    def writePushPop(self, action, segment, index):   
         if action == "pop":
             if segment == "local":
                 return ['@SP', 'M=M-1', '@LCL', 'D=M', f'@{index}', 'D=D+A', '@R13', 'M=D', '@SP', 'A=M', 'D=M', '@R13', 'A=M', 'M=D'] 
@@ -88,6 +93,24 @@ class CodeWriter:
             elif segment == "pointer":
                 return ['@R3', 'D=A', f'@{index}', 'D=D+A', 'A=D', 'D=M', '@SP', 'A=M', 'M=D', '@SP','M=M+1'] 
             
+    def writeLabel(self):
+        pass
+
+    def writeGoTo(self):
+        pass
+
+    def writeIf(self):
+        pass
+
+    def writeFunction(self):
+        pass
+
+    def writeCall(self):
+        pass
+
+    def writeReturn(self):
+        pass
+
     def close(self):
         with open(f"{self.file_title}.asm", 'r') as file:
             file.close()
