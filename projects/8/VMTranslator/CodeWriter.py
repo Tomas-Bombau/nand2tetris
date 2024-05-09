@@ -21,7 +21,6 @@ class CodeWriter:
 
     def write_file(self, parsed_commands):
         for commands in parsed_commands:
-            print(commands)
             for type_of_command, full_command in commands.items():
                 if type_of_command == "CMD_ARITHMETIC":
                     self.writen_format(full_command, self.writeArithmetic(full_command))
