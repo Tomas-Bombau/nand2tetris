@@ -1,20 +1,23 @@
-#! CLASS WRITER  
+#! CLASS WRITER
+import os  
 class CodeWriter:
-    def __init__(self, file_title):
-        self.file_title = file_title
+    def __init__(self, output_file):
+        self.output_file = output_file
+        self.file_title = os.path.basename(output_file).split(".")[0]
         self.label = 0
 
     def clear(self):
-        with open(f"{self.file_title}.asm", 'w'):
+        with open(f"{self.output_file}.asm", 'w'):
             pass
 
     def setFileName(self):
         pass
+    
     def writeInit(self):
         pass
 
     def writen_format(self, full_command, asm_commands):
-        with open(f"{self.file_title}.asm", "a") as asm_file:
+        with open(f"{self.output_file}.asm", "a") as asm_file:
             asm_file.write(f"// {full_command}\n")
             for asm_code in asm_commands:
                     asm_file.write(f"{asm_code}\n")
@@ -109,7 +112,7 @@ class CodeWriter:
         return [f"({label})"]
 
     def writeGoTo(self, label):
-        return [f"({label})", "0,JMP"]
+        return [f"@{label}", "0,JMP"]
 
     def writeIf(self, label):
         return [f'@SP', 'M=M-1', 'A=M', 'D=M', f'@{label}', 'D;JNE']
@@ -124,5 +127,5 @@ class CodeWriter:
         pass
 
     def close(self):
-        with open(f"{self.file_title}.asm", 'r') as file:
+        with open(f"{self.output_file}.asm", 'r') as file:
             file.close()
