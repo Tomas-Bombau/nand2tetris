@@ -5,6 +5,7 @@ class CodeWriter:
         self.output_file = output_file
         self.file_title = os.path.basename(output_file).split(".")[0]
         self.label = 0
+        self.retFunction = 0
 
     def clear(self):
         with open(f"{self.output_file}.asm", 'w'):
@@ -26,7 +27,8 @@ class CodeWriter:
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
                 if type_of_command == "CMD_ARITHMETIC":
-                    self.writen_format(full_command, self.writeArithmetic(full_command))
+                    operation = full_command
+                    self.writen_format(full_command, self.writeArithmetic(operation))
 
                 elif type_of_command in ["CMD_PUSH", "CMD_POP"]:
                     action, segment, index = full_command.split(" ")[0:3]
@@ -45,36 +47,39 @@ class CodeWriter:
                     self.writen_format(full_command, self.writeIf(label))
 
                 elif type_of_command == "CMD_FUNCTION":
-                    functionName, nArgs = full_command.split(" ")[1:3]
-                    self.writen_format(full_command, self.writeFunction(functionName, nArgs))
+                    functionName, nVars = full_command.split(" ")[1:3]
+                    self.writen_format(full_command, self.writeFunction(functionName, nVars))
 
                 elif type_of_command == "CMD_CALL":
                     functionName, nArgs = full_command.split(" ")[1:3]
                     self.writen_format(full_command, self.writeCall(functionName, nArgs))
 
+                elif type_of_command == "CMD_RETURN":
+                    self.writen_format(full_command, self.writeReturn())
+
                 elif type_of_command in ["CMD_COMMENTS", "CMD_BREAKLINE"]:
                     continue
 
-    def writeArithmetic(self, cmd_arithmetic):
-        if cmd_arithmetic == "add":
+    def writeArithmetic(self, operation):
+        if operation == "add":
             return ["@SP",'M=M-1', 'A=M', 'D=M', 'A=A-1','M=D+M'] 
-        elif cmd_arithmetic == "sub":
+        elif operation == "sub":
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1','M=M-D'] 
-        elif cmd_arithmetic == "neg":
+        elif operation == "neg":
             return ['@SP', "M=M-1", 'A=M', 'M=-M', '@SP','M=M+1'] 
-        elif cmd_arithmetic == "and":
+        elif operation == "and":
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1', 'M=D&M'] 
-        elif cmd_arithmetic == "or": 
+        elif operation == "or": 
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1', 'M=D|M'] 
-        elif cmd_arithmetic == "not":
+        elif operation == "not":
             return ['@SP', 'M=M-1', 'A=M', 'M=!M', '@SP', 'M=M+1'] 
-        elif cmd_arithmetic == "eq":
+        elif operation == "eq":
             self.label += 1
             return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@eqTrue{self.label}", "D;JEQ", "@SP", "A=M-1", "M=0", f"(eqTrue{self.label})"]
-        elif cmd_arithmetic =='gt': 
+        elif operation =='gt': 
             self.label += 1
             return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@gtTrue{self.label}", "D;JGT", "@SP", "A=M-1", "M=0", f"(gtTrue{self.label})"]
-        elif cmd_arithmetic =='lt': 
+        elif operation =='lt': 
             self.label += 1
             return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@ltTrue{self.label}", "D;JLT", "@SP", "A=M-1", "M=0", f"(ltTrue{self.label})"]
         else:
@@ -125,23 +130,41 @@ class CodeWriter:
     def writeIf(self, label):
         return [f'@SP', 'M=M-1', 'A=M', 'D=M', f'@{label}', 'D;JNE']
 
-    def writeFunction(self, functionName, nArgs):
-        label = [f"({functionName})"]
+    def writeFunction(self, functionName, nVars):
+        label = [f'({functionName})']
+        limits = ['@i', 'M=0', f'@{nVars}', 'D=A', '@numberVars', 'M=D']
+        condition = [f'({functionName}.LOOP)', '@numberVars', 'D=M', '@i', 'D=D-M', f'@{functionName}.ENDLOOP', 'D;JEQ']
+        pushVars = ['@SP', 'A=M', 'M=0']
+        moveSP = ['@SP', 'M=M+1']
+        addOneToI = ['@i', 'M=M+1']
+        backToCondition = [f'@{functionName}.LOOP', '0,JMP']
+        endLabel = [f'({functionName}.ENDLOOP)']
+        return label + limits + condition + pushVars + moveSP + addOneToI + backToCondition + endLabel 
 
     def writeCall(self, functionName, nArgs):
-        returnAddress = [f"@returnAddress", "D=A", "@SP", "A=M", "M=D", "@SP", "M=M+1"] #!CHEQUEAR
+        returnAddress = [f"@{functionName}$ret.{self.retFunction}", "D=A", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushLcl= ["@LCL", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushArg= ["@ARG", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushThis= ["@THIS", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushThat= ["@THAT", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
-        repositionArg = ["@SP", "A=M", "D=M", f"@{nArgs}", "D=D-A", "@5", "D=D-A", "@ARG", "M=D"]
+        repositionArg = ["@SP", "D=M", f"@{nArgs}", "D=D-A", "@5", "D=D-A", "@ARG", "M=D"]   
         repositionLcl = ["@SP", "D=M", "@LCL", "M=D"]
         jumpToCalledFunction = [f"@{functionName}", "0;JMP"]
-        addressLabel = ["(returnAddress)"] #!CHEQUEAR
+        addressLabel = [f"({functionName}$ret.{self.retFunction})"] 
+        self.retFunction += 1
         return returnAddress + pushLcl + pushArg + pushThis + pushThat + repositionArg + repositionLcl + jumpToCalledFunction + addressLabel
 
     def writeReturn(self):
-        pass
+        endFrame = ['@LCL', 'D=M', '@endFrame', 'M=D']
+        retAddr = ['@endFrame', 'D=M', '@5', 'A=D-A', 'D=M', '@retAddr', 'M=D']
+        retValue = ['@SP', 'M=M-1', 'A=M', 'D=M', '@ARG', 'A=M', 'M=D']
+        restoreSP = ['@ARG', 'M=M+1', 'D=M', '@SP', 'M=D'] #CHEQUEAR
+        restoreThat = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@THAT', 'M=D'] 
+        restoreThis = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@THIS', 'M=D']
+        restoreArg = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@ARG', 'M=D']
+        restoreLcl = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@LCL', 'M=D']
+        returnToRetAddr = ['@retAddr', '0;JMP']
+        return endFrame + retAddr + retValue + restoreSP + restoreThat + restoreThis + restoreArg + restoreLcl + returnToRetAddr
 
     def close(self):
         with open(f"{self.output_file}.asm", 'r') as file:

@@ -37,6 +37,8 @@ class Parser:
                 return "CMD_FUNCTION"
             elif "call" in commands:
                 return "CMD_CALL"
+            elif "return" in commands:
+                return "CMD_RETURN"
             
     def process_commands(self):
         self.commands = []
