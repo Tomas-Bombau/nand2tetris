@@ -33,6 +33,10 @@ class Parser:
                 return "CMD_IFGOTO"
             elif "goto" in commands:
                 return "CMD_GOTO"
+            elif "function" in commands:
+                return "CMD_FUNCTION"
+            elif "call" in commands:
+                return "CMD_CALL"
             
     def process_commands(self):
         self.commands = []

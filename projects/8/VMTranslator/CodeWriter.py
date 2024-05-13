@@ -44,6 +44,14 @@ class CodeWriter:
                     label = full_command.split(" ")[1]
                     self.writen_format(full_command, self.writeIf(label))
 
+                elif type_of_command == "CMD_FUNCTION":
+                    functionName, nArgs = full_command.split(" ")[1:3]
+                    self.writen_format(full_command, self.writeFunction(functionName, nArgs))
+
+                elif type_of_command == "CMD_CALL":
+                    functionName, nArgs = full_command.split(" ")[1:3]
+                    self.writen_format(full_command, self.writeCall(functionName, nArgs))
+
                 elif type_of_command in ["CMD_COMMENTS", "CMD_BREAKLINE"]:
                     continue
 
@@ -117,11 +125,20 @@ class CodeWriter:
     def writeIf(self, label):
         return [f'@SP', 'M=M-1', 'A=M', 'D=M', f'@{label}', 'D;JNE']
 
-    def writeFunction(self):
-        pass
+    def writeFunction(self, functionName, nArgs):
+        label = [f"({functionName})"]
 
-    def writeCall(self):
-        pass
+    def writeCall(self, functionName, nArgs):
+        returnAddress = [f"@returnAddress", "D=A", "@SP", "A=M", "M=D", "@SP", "M=M+1"] #!CHEQUEAR
+        pushLcl= ["@LCL", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
+        pushArg= ["@ARG", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
+        pushThis= ["@THIS", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
+        pushThat= ["@THAT", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
+        repositionArg = ["@SP", "A=M", "D=M", f"@{nArgs}", "D=D-A", "@5", "D=D-A", "@ARG", "M=D"]
+        repositionLcl = ["@SP", "D=M", "@LCL", "M=D"]
+        jumpToCalledFunction = [f"@{functionName}", "0;JMP"]
+        addressLabel = ["(returnAddress)"] #!CHEQUEAR
+        return returnAddress + pushLcl + pushArg + pushThis + pushThat + repositionArg + repositionLcl + jumpToCalledFunction + addressLabel
 
     def writeReturn(self):
         pass
