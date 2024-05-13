@@ -11,12 +11,6 @@ class CodeWriter:
         with open(f"{self.output_file}.asm", 'w'):
             pass
 
-    def setFileName(self):
-        pass
-    
-    def writeInit(self):
-        pass
-
     def writen_format(self, full_command, asm_commands):
         with open(f"{self.output_file}.asm", "a") as asm_file:
             asm_file.write(f"// {full_command}\n")
@@ -26,6 +20,7 @@ class CodeWriter:
     def write_file(self, parsed_commands):
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
+                #! PONER LOS COMMANDOS,ARGS1,ARGS2 ACA
                 if type_of_command == "CMD_ARITHMETIC":
                     operation = full_command
                     self.writen_format(full_command, self.writeArithmetic(operation))
