@@ -9,18 +9,8 @@ class VMTranslator():
         self.type_of_file()
 
     def type_of_file(self):
-        if os.path.isfile(self.args):
-            output_dir = os.path.dirname(self.args)
-            self.translate_file(self.args, output_dir)
-
-        elif os.path.isdir(self.args):
-            for file_name in os.listdir(self.args):
-                if file_name.endswith(".vm"):
-                    input_file = os.path.join(self.args, file_name)
-                    output_dir = self.args
-                    self.translate_file(input_file, output_dir)
-        else:
-            raise Exception("Neither a .vm file or a directory containing .vm files")
+        output_dir = os.path.dirname(self.args)
+        self.translate_file(self.args, output_dir)
         
     def translate_file(self, input_file, output_dir):
         #PARSE COMMANDS

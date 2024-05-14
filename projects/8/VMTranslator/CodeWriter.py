@@ -20,34 +20,31 @@ class CodeWriter:
     def write_file(self, parsed_commands):
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
-                #! PONER LOS COMMANDOS,ARGS1,ARGS2 ACA
+                parts = full_command.split(" ")
+                action = parts[0]
+                segment = parts[1] if len(parts) > 1 else None
+                index = parts[2] if len(parts) > 2 else None
+
                 if type_of_command == "CMD_ARITHMETIC":
-                    operation = full_command
-                    self.writen_format(full_command, self.writeArithmetic(operation))
+                    self.writen_format(full_command, self.writeArithmetic(action))
 
                 elif type_of_command in ["CMD_PUSH", "CMD_POP"]:
-                    action, segment, index = full_command.split(" ")[0:3]
                     self.writen_format(full_command, self.writePushPop(action, segment, index))
 
                 elif type_of_command == "CMD_LABEL":
-                    label = full_command.split(" ")[1]
-                    self.writen_format(full_command, self.writeLabel(label))
+                    self.writen_format(full_command, self.writeLabel(segment))
 
                 elif type_of_command == "CMD_GOTO":
-                    label = full_command.split(" ")[1]
-                    self.writen_format(full_command, self.writeGoTo(label))
+                    self.writen_format(full_command, self.writeGoTo(segment))
 
                 elif type_of_command == "CMD_IFGOTO":
-                    label = full_command.split(" ")[1]
-                    self.writen_format(full_command, self.writeIf(label))
+                    self.writen_format(full_command, self.writeIf(segment))
 
                 elif type_of_command == "CMD_FUNCTION":
-                    functionName, nVars = full_command.split(" ")[1:3]
-                    self.writen_format(full_command, self.writeFunction(functionName, nVars))
+                    self.writen_format(full_command, self.writeFunction(segment, index))
 
                 elif type_of_command == "CMD_CALL":
-                    functionName, nArgs = full_command.split(" ")[1:3]
-                    self.writen_format(full_command, self.writeCall(functionName, nArgs))
+                    self.writen_format(full_command, self.writeCall(segment, index))
 
                 elif type_of_command == "CMD_RETURN":
                     self.writen_format(full_command, self.writeReturn())
@@ -55,26 +52,26 @@ class CodeWriter:
                 elif type_of_command in ["CMD_COMMENTS", "CMD_BREAKLINE"]:
                     continue
 
-    def writeArithmetic(self, operation):
-        if operation == "add":
+    def writeArithmetic(self, action):
+        if action == "add":
             return ["@SP",'M=M-1', 'A=M', 'D=M', 'A=A-1','M=D+M'] 
-        elif operation == "sub":
+        elif action == "sub":
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1','M=M-D'] 
-        elif operation == "neg":
+        elif action == "neg":
             return ['@SP', "M=M-1", 'A=M', 'M=-M', '@SP','M=M+1'] 
-        elif operation == "and":
+        elif action == "and":
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1', 'M=D&M'] 
-        elif operation == "or": 
+        elif action == "or": 
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1', 'M=D|M'] 
-        elif operation == "not":
+        elif action == "not":
             return ['@SP', 'M=M-1', 'A=M', 'M=!M', '@SP', 'M=M+1'] 
-        elif operation == "eq":
+        elif action == "eq":
             self.label += 1
             return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@eqTrue{self.label}", "D;JEQ", "@SP", "A=M-1", "M=0", f"(eqTrue{self.label})"]
-        elif operation =='gt': 
+        elif action =='gt': 
             self.label += 1
             return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@gtTrue{self.label}", "D;JGT", "@SP", "A=M-1", "M=0", f"(gtTrue{self.label})"]
-        elif operation =='lt': 
+        elif action =='lt': 
             self.label += 1
             return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@ltTrue{self.label}", "D;JLT", "@SP", "A=M-1", "M=0", f"(ltTrue{self.label})"]
         else:
@@ -116,24 +113,24 @@ class CodeWriter:
             elif segment == "pointer":
                 return ['@R3', 'D=A', f'@{index}', 'D=D+A', 'A=D', 'D=M', '@SP', 'A=M', 'M=D', '@SP','M=M+1'] 
             
-    def writeLabel(self, label):
-        return [f"({label})"]
+    def writeLabel(self, segment):
+        return [f"({segment})"]
 
-    def writeGoTo(self, label):
-        return [f"@{label}", "0,JMP"]
+    def writeGoTo(self, segment):
+        return [f"@{segment}", "0,JMP"]
 
-    def writeIf(self, label):
-        return [f'@SP', 'M=M-1', 'A=M', 'D=M', f'@{label}', 'D;JNE']
+    def writeIf(self, segment):
+        return [f'@SP', 'M=M-1', 'A=M', 'D=M', f'@{segment}', 'D;JNE']
 
     def writeFunction(self, functionName, nVars):
         label = [f'({functionName})']
         limits = ['@i', 'M=0', f'@{nVars}', 'D=A', '@numberVars', 'M=D']
-        condition = [f'({functionName}.LOOP)', '@numberVars', 'D=M', '@i', 'D=D-M', f'@{functionName}.ENDLOOP', 'D;JEQ']
+        condition = [f'({functionName}$LOOP)', '@numberVars', 'D=M', '@i', 'D=D-M', f'@{functionName}$ENDLOOP', 'D;JEQ']
         pushVars = ['@SP', 'A=M', 'M=0']
-        moveSP = ['@SP', 'M=M+1']
         addOneToI = ['@i', 'M=M+1']
-        backToCondition = [f'@{functionName}.LOOP', '0,JMP']
-        endLabel = [f'({functionName}.ENDLOOP)']
+        moveSP = ['@SP', 'M=M+1']
+        backToCondition = [f'@{functionName}$LOOP', '0,JMP']
+        endLabel = [f'({functionName}$ENDLOOP)']
         return label + limits + condition + pushVars + moveSP + addOneToI + backToCondition + endLabel 
 
     def writeCall(self, functionName, nArgs):
@@ -153,12 +150,12 @@ class CodeWriter:
         endFrame = ['@LCL', 'D=M', '@endFrame', 'M=D']
         retAddr = ['@endFrame', 'D=M', '@5', 'A=D-A', 'D=M', '@retAddr', 'M=D']
         retValue = ['@SP', 'M=M-1', 'A=M', 'D=M', '@ARG', 'A=M', 'M=D']
-        restoreSP = ['@ARG', 'M=M+1', 'D=M', '@SP', 'M=D'] #CHEQUEAR
+        restoreSP = ['@ARG', 'M=M+1', 'D=M', '@SP', 'M=D'] 
         restoreThat = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@THAT', 'M=D'] 
         restoreThis = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@THIS', 'M=D']
         restoreArg = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@ARG', 'M=D']
         restoreLcl = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@LCL', 'M=D']
-        returnToRetAddr = ['@retAddr', '0;JMP']
+        returnToRetAddr = ['@retAddr', 'A=M', '0;JMP']
         return endFrame + retAddr + retValue + restoreSP + restoreThat + restoreThis + restoreArg + restoreLcl + returnToRetAddr
 
     def close(self):

@@ -21,12 +21,6 @@ class Parser:
                 return "CMD_COMMENTS"
             elif commands == "":
                 return "CMD_BREAKLINE"
-            elif "push" in commands:
-                return "CMD_PUSH"
-            elif "pop" in commands:
-                return "CMD_POP"
-            elif any(op in commands for op in ['add', 'sub', 'neg', 'eq', 'gt', 'lt', 'and', 'or', 'not']):
-                return "CMD_ARITHMETIC"
             elif "label" in commands:
                 return "CMD_LABEL"
             elif "if-goto" in commands:
@@ -39,6 +33,13 @@ class Parser:
                 return "CMD_CALL"
             elif "return" in commands:
                 return "CMD_RETURN"
+            elif "push" in commands:
+                return "CMD_PUSH"
+            elif "pop" in commands:
+                return "CMD_POP"
+            elif any(op in commands for op in ['add', 'sub', 'neg', 'eq', 'gt', 'lt', 'and', 'or', 'not']):
+                return "CMD_ARITHMETIC"
+
             
     def process_commands(self):
         self.commands = []
