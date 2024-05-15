@@ -9,19 +9,18 @@ class VMTranslator():
             self.translate_file(file_path, os.path.dirname(file_path))
 
         elif os.path.isdir(file_path):
+            directory_name = os.path.basename(os.path.normpath(file_path))
+            asm_file_path = os.path.join(file_path, f"{directory_name}")
+            
             for filename in os.listdir(file_path):
                 if filename.endswith(".vm"):
-                    self.translate_file(os.path.join(file_path, filename), file_path)
-                    
-        else:
-            raise Exception("Neither a .vm file nor a directory containing .vm files")
+                    self.translate_file(os.path.join(file_path, filename), asm_file_path)
 
-    def translate_file(self, input_file, output_dir):
+    def translate_file(self, input_file, output_file):
         # Parse commands
         parser = Parser(input_file)
         file_title = parser.title()
         file_parsed = parser.process_commands()
-        output_file = os.path.join(output_dir, file_title)
 
         # Write assembly language
         writer = CodeWriter(output_file)

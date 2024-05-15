@@ -11,6 +11,9 @@ class CodeWriter:
         with open(f"{self.output_file}.asm", 'w'):
             pass
 
+    def write_init(self):
+        return ['@256','D=A','@SP','M=D']
+    
     def writen_format(self, full_command, asm_commands):
         with open(f"{self.output_file}.asm", "a") as asm_file:
             asm_file.write(f"// {full_command}\n")
@@ -18,6 +21,8 @@ class CodeWriter:
                     asm_file.write(f"{asm_code}\n")
 
     def write_file(self, parsed_commands):
+        # self.writen_format('ESA', self.write_init())
+        # self.writen_format('Call Sys.init 0', self.writeCall("Sys.init", 0))
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
                 parts = full_command.split(" ")
