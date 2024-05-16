@@ -3,7 +3,7 @@ import os
 from Parser import Parser
 from CodeWriter import CodeWriter
 
-class VMTranslator():
+class VMTranslator(): #!ES UN CHINO PERO FUNCIONA.
     def __init__(self, file_path):
         self.directory_name = os.path.basename(os.path.normpath(file_path))
         self.directory_path =  os.path.dirname(file_path)
