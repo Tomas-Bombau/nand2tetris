@@ -9,14 +9,10 @@ class CodeWriter:
         self._lt_number = 0
         self.retFunction = 0
 
-    def clear(self):
-        with open(f"{self.output_file}.asm", 'w'):
-            pass
-
     def write_init(self):
         return ['@256','D=A','@SP','M=D']
     
-    def setFile(self,):
+    def setFile(self):
         with open(f"{self.output_file}.asm", "a") as asm_file:
             for asm_code in self.write_init():
                     asm_file.write(f"{asm_code}\n")
@@ -25,10 +21,17 @@ class CodeWriter:
                     asm_file.write(f"{asd}\n")     
     
     def writen_format(self, full_command, asm_commands):
-        with open(f"{self.output_file}.asm", "a") as asm_file:
-            asm_file.write(f"// {full_command}\n")
-            for asm_code in asm_commands:
+        if self.output_file.endswith(".vm"):
+            asm_file_path = self.output_file.replace(".vm", ".asm")
+            with open(asm_file_path, "a") as asm_file:
+                asm_file.write(f"// {full_command}\n")
+                for asm_code in asm_commands:
                     asm_file.write(f"{asm_code}\n")
+        else:
+            with open(f"{self.output_file}.asm", "a") as asm_file:
+                asm_file.write(f"// {full_command}\n")
+                for asm_code in asm_commands:
+                        asm_file.write(f"{asm_code}\n")
 
     def write_file(self, parsed_commands, filename):
         for commands in parsed_commands:
@@ -175,5 +178,10 @@ class CodeWriter:
         return endFrame + retAddr + retValue + restoreSP + restoreThat + restoreThis + restoreArg + restoreLcl + returnToRetAddr
 
     def close(self):
-        with open(f"{self.output_file}.asm", 'r') as file:
-            file.close()
+        if self.output_file.endswith(".vm"):
+            asm_file_path = self.output_file.replace(".vm", ".asm")
+            with open(f"{asm_file_path}", 'r') as file:
+                file.close()
+        else: 
+            with open(f"{self.output_file}.asm", 'r') as file:
+                file.close()

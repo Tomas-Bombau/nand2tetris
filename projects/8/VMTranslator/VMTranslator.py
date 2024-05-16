@@ -6,14 +6,16 @@ from CodeWriter import CodeWriter
 class VMTranslator():
     def __init__(self, file_path):
         self.directory_name = os.path.basename(os.path.normpath(file_path))
+        self.directory_path =  os.path.dirname(file_path)
         self.asm_file_path = os.path.join(file_path, f"{self.directory_name}")
-        self.CodeWriter = CodeWriter(self.asm_file_path)
+        self.CodeWriter = None
     
         if os.path.isfile(file_path):
+            self.CodeWriter = CodeWriter(file_path)
             self.translate_file(file_path, os.path.dirname(file_path))
 
-
         elif os.path.isdir(file_path):
+            self.CodeWriter = CodeWriter(self.asm_file_path)
             count = 0
             for filename in os.listdir(file_path):
                 if filename.endswith(".vm"):
