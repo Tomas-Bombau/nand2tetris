@@ -4,7 +4,9 @@ class CodeWriter:
     def __init__(self, output_file):
         self.output_file = output_file
         self.file_title = os.path.basename(output_file).split(".")[0]
-        self.label = 0
+        self._eq_number = 0
+        self._gt_number = 0
+        self._lt_number = 0
         self.retFunction = 0
 
     def clear(self):
@@ -14,6 +16,14 @@ class CodeWriter:
     def write_init(self):
         return ['@256','D=A','@SP','M=D']
     
+    def setFile(self,):
+        with open(f"{self.output_file}.asm", "a") as asm_file:
+            for asm_code in self.write_init():
+                    asm_file.write(f"{asm_code}\n")
+            asm_file.write(f"// call Sys.init 0\n")
+            for asd in self.writeCall("Sys.init", "0"):
+                    asm_file.write(f"{asd}\n")        
+    
     def writen_format(self, full_command, asm_commands):
         with open(f"{self.output_file}.asm", "a") as asm_file:
             asm_file.write(f"// {full_command}\n")
@@ -21,15 +31,12 @@ class CodeWriter:
                     asm_file.write(f"{asm_code}\n")
 
     def write_file(self, parsed_commands):
-        # self.writen_format('ESA', self.write_init())
-        # self.writen_format('Call Sys.init 0', self.writeCall("Sys.init", 0))
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
                 parts = full_command.split(" ")
                 action = parts[0]
                 segment = parts[1] if len(parts) > 1 else None
                 index = parts[2] if len(parts) > 2 else None
-
                 if type_of_command == "CMD_ARITHMETIC":
                     self.writen_format(full_command, self.writeArithmetic(action))
 
@@ -59,26 +66,29 @@ class CodeWriter:
 
     def writeArithmetic(self, action):
         if action == "add":
-            return ["@SP",'M=M-1', 'A=M', 'D=M', 'A=A-1','M=D+M'] 
+            return ['@SP', 'M=M-1', 'A=M', 'D=M', '@SP', 'M=M-1', 'A=M', 'M=D+M', "@SP", 'M=M+1'] 
         elif action == "sub":
-            return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1','M=M-D'] 
+            return ['@SP', 'M=M-1', 'A=M', 'D=M', '@SP', 'M=M-1', 'A=M', 'M=M-D', "@SP", 'M=M+1'] 
         elif action == "neg":
             return ['@SP', "M=M-1", 'A=M', 'M=-M', '@SP','M=M+1'] 
         elif action == "and":
-            return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1', 'M=D&M'] 
+            return ['@SP', 'M=M-1', 'A=M', 'D=M','@SP', 'M=M-1', 'A=M', 'M=D&M', '@SP', 'M=M+1'] 
         elif action == "or": 
             return ['@SP', 'M=M-1', 'A=M', 'D=M', 'A=A-1', 'M=D|M'] 
         elif action == "not":
             return ['@SP', 'M=M-1', 'A=M', 'M=!M', '@SP', 'M=M+1'] 
         elif action == "eq":
-            self.label += 1
-            return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@eqTrue{self.label}", "D;JEQ", "@SP", "A=M-1", "M=0", f"(eqTrue{self.label})"]
+            value = ['@SP','M=M-1', 'A=M', 'D=M','@SP','M=M-1', 'A=M','D=D-M',f'@eq{self._eq_number}', 'D;JEQ','D=0', f'@eq.end{self._eq_number}', '0;JMP', f'(eq{self._eq_number})','D=-1', f'(eq.end{self._eq_number})', '@SP','A=M', 'M=D','@SP','M=M+1']
+            self._eq_number += 1
+            return value
         elif action =='gt': 
-            self.label += 1
-            return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@gtTrue{self.label}", "D;JGT", "@SP", "A=M-1", "M=0", f"(gtTrue{self.label})"]
+            value = ['@SP','M=M-1', 'A=M', 'D=M','@SP','M=M-1', 'A=M','D=D-M',f'@gt{self._gt_number}', 'D;JLT','D=0',f'@gt.end{self._gt_number}', '0;JMP', f'(gt{self._gt_number})','D=-1', f'(gt.end{self._gt_number})', '@SP','A=M', 'M=D','@SP','M=M+1']
+            self._gt_number += 1
+            return value
         elif action =='lt': 
-            self.label += 1
-            return ['@SP', "AM=M-1", "D=M", "@SP", "A=M-1", "D=M-D", "M=-1", f"@ltTrue{self.label}", "D;JLT", "@SP", "A=M-1", "M=0", f"(ltTrue{self.label})"]
+            value = ['@SP','M=M-1', 'A=M', 'D=M','@SP','M=M-1', 'A=M','D=D-M',f'@lt{self._lt_number}', 'D;JGT','D=0',f'@lt.end{self._lt_number}', '0;JMP', f'(lt{self._lt_number})','D=-1', f'(lt.end{self._lt_number})', '@SP','A=M', 'M=D','@SP','M=M+1']
+            self._lt_number += 1
+            return value
         else:
             raise ValueError("Arithmetic or logic command error ") 
 
@@ -102,13 +112,13 @@ class CodeWriter:
                 return ['@SP','M=M-1', '@R3', 'D=A', f'@{index}', 'D=D+A', '@R13', 'M=D', '@SP', 'A=M', 'D=M', '@R13', 'A=M', 'M=D'] 
         elif action == "push":
             if segment == "local":
-                return ['@LCL', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D', '@SP', 'M=M+1'] 
+                return [f'@{index}', 'D=A', '@LCL', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
             elif segment == "argument":
-                return ['@ARG', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D','@SP', 'M=M+1'] 
+                return [f'@{index}', 'D=A', '@ARG', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
             elif segment == "this":
-                return ['@THIS', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D', '@SP', 'M=M+1'] 
+                return [f'@{index}', 'D=A', '@THIS', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
             elif segment == "that":
-                return ['@THAT', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D', '@SP', 'M=M+1'] 
+                return [f'@{index}', 'D=A', '@THAT', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
             elif segment == "constant":
                 return [f'@{index}', 'D=A', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "static":
@@ -129,31 +139,32 @@ class CodeWriter:
 
     def writeFunction(self, functionName, nVars):
         label = [f'({functionName})']
-        limits = ['@i', 'M=0', f'@{nVars}', 'D=A', '@numberVars', 'M=D']
-        condition = [f'({functionName}$LOOP)', '@numberVars', 'D=M', '@i', 'D=D-M', f'@{functionName}$ENDLOOP', 'D;JEQ']
+        limits = ['@i', 'M=0', f'@{nVars}', 'D=A', '@n', 'M=D']
+        condition = [f'({functionName}$LOOP)', '@n', 'D=M', '@i', 'D=D-M', f'@{functionName}$ENDLOOP', 'D;JEQ']
         pushVars = ['@SP', 'A=M', 'M=0']
         addOneToI = ['@i', 'M=M+1']
         moveSP = ['@SP', 'M=M+1']
-        backToCondition = [f'@{functionName}$LOOP', '0,JMP']
+        backToCondition = [f'@{functionName}$LOOP', '0;JMP']
         endLabel = [f'({functionName}$ENDLOOP)']
-        return label + limits + condition + pushVars + moveSP + addOneToI + backToCondition + endLabel 
+        return label + limits + condition + pushVars + addOneToI + moveSP + backToCondition + endLabel 
 
-    def writeCall(self, functionName, nArgs):
+    def writeCall(self, functionName, n):
         returnAddress = [f"@{functionName}$ret.{self.retFunction}", "D=A", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushLcl= ["@LCL", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushArg= ["@ARG", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushThis= ["@THIS", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
         pushThat= ["@THAT", "D=M", "@SP", "A=M", "M=D", "@SP", "M=M+1"]
-        repositionArg = ["@SP", "D=M", f"@{nArgs}", "D=D-A", "@5", "D=D-A", "@ARG", "M=D"]   
+        repositionArg = ["@SP", "D=M","@5", "D=D-A", f"@{n}", "D=D-A", "@ARG", "M=D"]   
         repositionLcl = ["@SP", "D=M", "@LCL", "M=D"]
         jumpToCalledFunction = [f"@{functionName}", "0;JMP"]
         addressLabel = [f"({functionName}$ret.{self.retFunction})"] 
+        value = returnAddress + pushLcl + pushArg + pushThis + pushThat + repositionArg + repositionLcl + jumpToCalledFunction + addressLabel
         self.retFunction += 1
-        return returnAddress + pushLcl + pushArg + pushThis + pushThat + repositionArg + repositionLcl + jumpToCalledFunction + addressLabel
+        return value
 
     def writeReturn(self):
         endFrame = ['@LCL', 'D=M', '@endFrame', 'M=D']
-        retAddr = ['@endFrame', 'D=M', '@5', 'A=D-A', 'D=M', '@retAddr', 'M=D']
+        retAddr = ['@endFrame', 'D=M','@5','A=D-A','D=M','@retAddr', 'M=D']
         retValue = ['@SP', 'M=M-1', 'A=M', 'D=M', '@ARG', 'A=M', 'M=D']
         restoreSP = ['@ARG', 'M=M+1', 'D=M', '@SP', 'M=D'] 
         restoreThat = ['@endFrame', 'M=M-1', 'A=M', 'D=M', '@THAT', 'M=D'] 

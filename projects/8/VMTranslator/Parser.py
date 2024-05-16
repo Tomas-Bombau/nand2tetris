@@ -17,28 +17,43 @@ class Parser:
         return self.all_lines
     
     def command_type(self, commands):
-            if commands.startswith("/"):
+            command = commands.split("//")[0].strip() 
+            if command.startswith("/"):
                 return "CMD_COMMENTS"
-            elif commands == "":
+            elif command == "":
                 return "CMD_BREAKLINE"
-            elif "label" in commands:
+            elif command == 'add':
+                return "CMD_ARITHMETIC"
+            elif command == 'sub':
+                return "CMD_ARITHMETIC"
+            elif command == 'neg':
+                return "CMD_ARITHMETIC"
+            elif command == 'gt':
+                return "CMD_ARITHMETIC"
+            elif command == 'lt':
+                return "CMD_ARITHMETIC"
+            elif command == 'and':
+                return "CMD_ARITHMETIC"
+            elif command == 'or':
+                return "CMD_ARITHMETIC"
+            elif command == 'not':
+                return "CMD_ARITHMETIC"
+            elif "label" in command:
                 return "CMD_LABEL"
-            elif "if-goto" in commands:
+            elif "if-goto" in command:
                 return "CMD_IFGOTO"
-            elif "goto" in commands:
+            elif "goto" in command:
                 return "CMD_GOTO"
-            elif "function" in commands:
+            elif "function" in command:
                 return "CMD_FUNCTION"
-            elif "call" in commands:
+            elif "call" in command:
                 return "CMD_CALL"
-            elif "return" in commands:
+            elif "return" in command:
                 return "CMD_RETURN"
-            elif "push" in commands:
+            elif "push" in command:
                 return "CMD_PUSH"
             elif "pop" in commands:
                 return "CMD_POP"
-            elif any(op in commands for op in ['add', 'sub', 'neg', 'eq', 'gt', 'lt', 'and', 'or', 'not']):
-                return "CMD_ARITHMETIC"
 
             
     def process_commands(self):
@@ -46,6 +61,5 @@ class Parser:
         self.read_vm_file()
         for command in self.all_lines:
             type_of_command = self.command_type(command)
-            command = command.split("//")[0].strip() #!CHEQUEAR
             self.commands.append({type_of_command: command})
         return self.commands
