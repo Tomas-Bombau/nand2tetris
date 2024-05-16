@@ -98,7 +98,7 @@ M=M+1
 M=M-1
 A=M
 D=M
-@StaticsTest.0
+@Class1.0
 M=D
 // push argument 1
 @1
@@ -120,7 +120,7 @@ M=M+1
 M=M-1
 A=M
 D=M
-@StaticsTest.1
+@Class1.1
 M=D
 // push constant 0
 @0
@@ -207,7 +207,7 @@ M=M+1
 0;JMP
 (Class1.get$ENDLOOP)
 // push static 0
-@StaticsTest.0
+@Class1.0
 D=M
 @SP
 A=M
@@ -215,7 +215,7 @@ M=D
 @SP
 M=M+1
 // push static 1
-@StaticsTest.1
+@Class1.1
 D=M
 @SP
 A=M
@@ -329,7 +329,7 @@ M=M+1
 M=M-1
 A=M
 D=M
-@StaticsTest.0
+@Class2.0
 M=D
 // push argument 1
 @1
@@ -351,7 +351,7 @@ M=M+1
 M=M-1
 A=M
 D=M
-@StaticsTest.1
+@Class2.1
 M=D
 // push constant 0
 @0
@@ -438,7 +438,7 @@ M=M+1
 0;JMP
 (Class2.get$ENDLOOP)
 // push static 0
-@StaticsTest.0
+@Class2.0
 D=M
 @SP
 A=M
@@ -446,7 +446,7 @@ M=D
 @SP
 M=M+1
 // push static 1
-@StaticsTest.1
+@Class2.1
 D=M
 @SP
 A=M

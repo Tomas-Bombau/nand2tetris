@@ -2,10 +2,10 @@
 import os
 
 class Parser:
-    def __init__(self, input_file):
+    def __init__(self, input_file, file_name):
         self.all_lines = []
         self.input_file = input_file
-        self.filename = os.path.basename(input_file).split(".")[0]
+        self.filename = file_name
 
     def title(self):
         return self.filename

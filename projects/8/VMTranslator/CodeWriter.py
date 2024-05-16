@@ -22,7 +22,7 @@ class CodeWriter:
                     asm_file.write(f"{asm_code}\n")
             asm_file.write(f"// call Sys.init 0\n")
             for asd in self.writeCall("Sys.init", "0"):
-                    asm_file.write(f"{asd}\n")        
+                    asm_file.write(f"{asd}\n")     
     
     def writen_format(self, full_command, asm_commands):
         with open(f"{self.output_file}.asm", "a") as asm_file:
@@ -30,7 +30,7 @@ class CodeWriter:
             for asm_code in asm_commands:
                     asm_file.write(f"{asm_code}\n")
 
-    def write_file(self, parsed_commands):
+    def write_file(self, parsed_commands, filename):
         for commands in parsed_commands:
             for type_of_command, full_command in commands.items():
                 parts = full_command.split(" ")
@@ -41,7 +41,7 @@ class CodeWriter:
                     self.writen_format(full_command, self.writeArithmetic(action))
 
                 elif type_of_command in ["CMD_PUSH", "CMD_POP"]:
-                    self.writen_format(full_command, self.writePushPop(action, segment, index))
+                    self.writen_format(full_command, self.writePushPop(action, segment, index, filename))
 
                 elif type_of_command == "CMD_LABEL":
                     self.writen_format(full_command, self.writeLabel(segment))
@@ -92,7 +92,7 @@ class CodeWriter:
         else:
             raise ValueError("Arithmetic or logic command error ") 
 
-    def writePushPop(self, action, segment, index):   
+    def writePushPop(self, action, segment, index, filename):   
         if action == "pop":
             if segment == "local":
                 return ['@SP', 'M=M-1', '@LCL', 'D=M', f'@{index}', 'D=D+A', '@R13', 'M=D', '@SP', 'A=M', 'D=M', '@R13', 'A=M', 'M=D'] 
@@ -105,7 +105,7 @@ class CodeWriter:
             elif segment == "constant":
                 raise ValueError("You cant pop constants. Change your vm code.") 
             elif segment == "static":
-                return ['@SP', 'M=M-1', 'A=M','D=M', f'@{self.file_title}.{index}', 'M=D'] 
+                return ['@SP', 'M=M-1', 'A=M','D=M', f'@{filename}.{index}', 'M=D'] 
             elif segment == "temp":
                 return ['@SP', 'M=M-1', '@R5', 'D=A', f'@{index}', 'D=D+A', '@R13', 'M=D', '@SP', 'A=M', 'D=M','@R13', 'A=M', 'M=D'] 
             elif segment == "pointer":
@@ -122,7 +122,7 @@ class CodeWriter:
             elif segment == "constant":
                 return [f'@{index}', 'D=A', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "static":
-                return [f'@{self.file_title}.{index}', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'] 
+                return [f'@{filename}.{index}', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "temp":
                 return ['@R5', 'D=A', f'@{index}', 'D=D+A', 'A=D', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "pointer":
