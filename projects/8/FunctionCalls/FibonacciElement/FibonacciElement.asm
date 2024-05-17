@@ -79,14 +79,11 @@ M=M+1
 0;JMP
 (Main.fibonacci$ENDLOOP)
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -136,14 +133,11 @@ D;JNE
 // label N_LT_2               // if n < 2 returns n
 (N_LT_2)
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -204,14 +198,11 @@ A=M
 // label N_GE_2               // if n >= 2 returns fib(n - 2) + fib(n - 1)
 (N_GE_2)
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -289,14 +280,11 @@ M=D
 0;JMP
 (Main.fibonacci$ret.1)
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M

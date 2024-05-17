@@ -79,14 +79,11 @@ M=M+1
 0;JMP
 (Class1.set$ENDLOOP)
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -101,14 +98,11 @@ D=M
 @Class1.0
 M=D
 // push argument 1
-@1
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@1
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -310,14 +304,11 @@ M=M+1
 0;JMP
 (Class2.set$ENDLOOP)
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -332,14 +323,11 @@ D=M
 @Class2.0
 M=D
 // push argument 1
-@1
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@1
+D=D+A
+A=D
 D=M
 @SP
 A=M

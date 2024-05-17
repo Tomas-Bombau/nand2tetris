@@ -109,13 +109,13 @@ class CodeWriter:
                 return ['@SP','M=M-1', '@R3', 'D=A', f'@{index}', 'D=D+A', '@R13', 'M=D', '@SP', 'A=M', 'D=M', '@R13', 'A=M', 'M=D'] 
         elif action == "push":
             if segment == "local":
-                return [f'@{index}', 'D=A', '@LCL', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
+                return ['@LCL', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "argument":
-                return [f'@{index}', 'D=A', '@ARG', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
+                return ['@ARG', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D','@SP', 'M=M+1'] 
             elif segment == "this":
-                return [f'@{index}', 'D=A', '@THIS', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
+                return ['@THIS', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "that":
-                return [f'@{index}', 'D=A', '@THAT', 'D=D+M', '@addr', 'M=D', '@addr', 'A=M', 'D=M', '@SP', 'A=M', 'M=D','@SP', 'M=M+1' ] 
+                return ['@THAT', 'D=M', f'@{index}', 'D=D+A', 'A=D', 'D=M','@SP','A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "constant":
                 return [f'@{index}', 'D=A', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1'] 
             elif segment == "static":
