@@ -1,0 +1,33 @@
+class Game {
+    field Random random;
+
+    method void play() {
+        var boolean exit;
+        var int guess;
+        var int randomNumber;
+        let exit = true;
+
+        while (true) {
+            do Output.println();
+            let guess = Keyboard.readInt("Pick a Number: ");
+            let randomNumber = 2;
+            // let randomNumber = random.randRange(100);
+            // do Output.printInt(randomNumber);
+
+            if (guess = randomNumber) {
+                do Output.printString("Correct! You guessed the number!");
+                do Output.println();
+                return;
+            } else {
+                if (guess < randomNumber){
+                    do Output.printString("Wrong number! Pick a higher number.");
+                    do Output.println();
+                } else {
+                    do Output.printString("Wrong number! Pick a lower number.");
+                    do Output.println();
+                }
+            } 
+        }
+    return;
+    }
+}

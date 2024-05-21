@@ -24,14 +24,11 @@ M=M+1
 0;JMP
 (SimpleFunction.test$ENDLOOP)
 // push local 0
-@0
-D=A
 @LCL
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -39,14 +36,11 @@ M=D
 @SP
 M=M+1
 // push local 1
-@1
-D=A
 @LCL
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@1
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -72,14 +66,11 @@ M=!M
 @SP
 M=M+1
 // push argument 0
-@0
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@0
+D=D+A
+A=D
 D=M
 @SP
 A=M
@@ -98,14 +89,11 @@ M=D+M
 @SP
 M=M+1
 // push argument 1
-@1
-D=A
 @ARG
-D=D+M
-@addr
-M=D
-@addr
-A=M
+D=M
+@1
+D=D+A
+A=D
 D=M
 @SP
 A=M
