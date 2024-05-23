@@ -113,6 +113,12 @@ eq
 if-goto IF_TRUE0
 goto IF_FALSE0
 label IF_TRUE0
+call Screen.clearScreen 0
+pop temp 0
+push constant 0
+push constant 0
+call Output.moveCursor 2
+pop temp 0
 push constant 0
 not
 pop local 1
@@ -120,7 +126,21 @@ goto IF_END0
 label IF_FALSE0
 push constant 0
 pop local 1
-call Output.println 0
+call Screen.clearScreen 0
+pop temp 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+push constant 0
+push constant 511
+push constant 255
+call Screen.drawRectangle 4
+pop temp 0
+push constant 20
+push constant 20
+call Output.moveCursor 2
 pop temp 0
 push constant 23
 call String.new 1

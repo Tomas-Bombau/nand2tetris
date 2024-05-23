@@ -15,17 +15,15 @@ class Game {
 
         do Output.println();
         let randomNumber = Keyboard.readInt("Pick a number to generate the one to guess: ");
-        do Random.setSeed(randomNumber);
-        do Random.rand(); 
+        do random.setSeed(randomNumber);
+        do random.rand(); 
         let range = 100; 
         let randomInRange = random.randRange(range);
-        do Output.printInt(randomInRange);
         do Output.println();
 
         while (true) {
             do Output.println();
             let guess = Keyboard.readInt("Pick a number: ");
-            do Output.printInt(randomInRange);
 
             if (guess = randomInRange) {
                 do Output.printString("Correct! You guessed the number!");
@@ -33,6 +31,7 @@ class Game {
                 return;
             } else {
                 if (guess < randomInRange){
+                    do Screen.setColor(true);
                     do Output.printString("Wrong number! Pick a higher number.");
                     do Output.println();
                 } else {
