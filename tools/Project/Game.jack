@@ -2,24 +2,37 @@ class Game {
     field Random random;
 
     method void play() {
-        var boolean exit;
+        var Random random;
+        var String string;
         var int guess;
+        var int range;
+        var int randomInRange;
         var int randomNumber;
+        var boolean exit;
+        var int result;
+
         let exit = true;
+
+        do Output.println();
+        let randomNumber = Keyboard.readInt("Pick a number to generate the one to guess: ");
+        do Random.setSeed(randomNumber);
+        do Random.rand(); 
+        let range = 100; 
+        let randomInRange = random.randRange(range);
+        do Output.printInt(randomInRange);
+        do Output.println();
 
         while (true) {
             do Output.println();
-            let guess = Keyboard.readInt("Pick a Number: ");
-            let randomNumber = 2;
-            // let randomNumber = random.randRange(100);
-            // do Output.printInt(randomNumber);
+            let guess = Keyboard.readInt("Pick a number: ");
+            do Output.printInt(randomInRange);
 
-            if (guess = randomNumber) {
+            if (guess = randomInRange) {
                 do Output.printString("Correct! You guessed the number!");
                 do Output.println();
                 return;
             } else {
-                if (guess < randomNumber){
+                if (guess < randomInRange){
                     do Output.printString("Wrong number! Pick a higher number.");
                     do Output.println();
                 } else {
