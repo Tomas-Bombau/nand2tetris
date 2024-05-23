@@ -4,41 +4,100 @@ class Game {
     method void play() {
         var Random random;
         var String string;
-        var int guess;
+        var int randomNumber;
         var int range;
         var int randomInRange;
-        var int randomNumber;
+        var int guess;
+        var int try;
+        var int counter;
         var boolean exit;
-        var int result;
 
         let exit = true;
+        let try = 0;
+        do Screen.setColor(true);
+        
+        // Counter above
+        do Screen.drawLine(0,210,511,210);
+        do Screen.drawLine(0,211,511,211);
+        do Screen.drawLine(0,212,511,212);
+        do Output.moveCursor(21, 23);
+        do Output.printString("Remaining tries: 3");
 
+        //Generate random number
+        do Screen.drawLine(0,30,511,30);
+        do Screen.drawLine(0,31,511,31);
+        do Screen.drawLine(0,32,511,32);
         do Output.println();
+        do Output.moveCursor(0, 10);
         let randomNumber = Keyboard.readInt("Pick a number to generate the one to guess: ");
         do random.setSeed(randomNumber);
         do random.rand(); 
         let range = 100; 
         let randomInRange = random.randRange(range);
         do Output.println();
+        do Output.println();
 
         while (true) {
-            do Output.println();
-            let guess = Keyboard.readInt("Pick a number: ");
-
-            if (guess = randomInRange) {
-                do Output.printString("Correct! You guessed the number!");
-                do Output.println();
-                return;
-            } else {
-                if (guess < randomInRange){
-                    do Screen.setColor(true);
-                    do Output.printString("Wrong number! Pick a higher number.");
+            if (try < 3){
+                if (try = 1) {
+                    do Output.moveCursor(21, 23);
+                    do Output.printString("Remaining tries: 2");
+                    do Output.moveCursor(0, 0);
                     do Output.println();
-                } else {
-                    do Output.printString("Wrong number! Pick a lower number.");
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
                     do Output.println();
                 }
-            } 
+                    
+                if (try = 2) {
+                    do Output.moveCursor(21, 23);
+                    do Output.printString("Remaining tries: 1");
+                    do Output.moveCursor(0, 0);
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                    do Output.println();
+                }
+
+                do Output.println();
+                let guess = Keyboard.readInt("Pick a number: ");
+
+                if (guess = randomInRange) {
+                    do Output.printString("Correct! You guessed the number!");
+                    do Output.println();
+                    return;
+                } else {
+                    if (guess < randomInRange){
+                        let try = try + 1;
+                        do Output.printString("Wrong number! Pick a higher number.");
+                        do Output.println();
+                    } else {
+                        let try = try + 1;
+                        do Output.printString("Wrong number! Pick a lower number.");
+                        do Output.println();
+                    }
+                }
+            } else {
+                do Screen.clearScreen();
+                do Output.moveCursor(21, 23);
+                do Output.printString("Remaining tries: 0");
+                do Output.moveCursor(10,27);
+	            do Output.printString("GAME OVER");
+                do Output.moveCursor(5,23
+                );
+	            do Output.printString("You din't guess it");
+                return;
+            }
         }
     return;
     }

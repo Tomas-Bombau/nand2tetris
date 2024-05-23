@@ -8,6 +8,7 @@ class Main {
         while (playAgain) {
             do game.play();
             do Output.println();
+            do Output.moveCursor(15, 10);
             let response = Keyboard.readInt("Do you want to play again? (yes = 1, no = 0): ");
             if (response = 1) {
                 do Screen.clearScreen();
