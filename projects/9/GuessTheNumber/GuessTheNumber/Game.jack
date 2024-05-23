@@ -29,7 +29,7 @@ class Game {
         do Screen.drawLine(0,32,511,32);
         do Output.println();
         do Output.moveCursor(0, 10);
-        let randomNumber = Keyboard.readInt("Pick a number to generate the one to guess: ");
+        let randomNumber = Keyboard.readInt("Choose a number to generate the one to guess: ");
         do random.setSeed(randomNumber);
         do random.rand(); 
         let range = 100; 
@@ -70,7 +70,7 @@ class Game {
                 }
 
                 do Output.println();
-                let guess = Keyboard.readInt("Pick a number: ");
+                let guess = Keyboard.readInt("Pick a number from 1 to 100: ");
 
                 if (guess = randomInRange) {
                     do Output.printString("Correct! You guessed the number!");
