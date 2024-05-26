@@ -18,7 +18,7 @@ class JackTokenizer:
                 lines = lines.strip()
                 lines = re.sub(r"(\/\/.*|\/\*[\s\S]*?\*\/)", '', lines)
                 lines = re.sub(r'([()\{\};.])', r' \1 ', lines)
-                tokens = re.split(r'(\s+|[()\{\};])', lines)
+                tokens = re.split(r'(\s+|[()\{\};,])', lines)
                 tokens = [token for token in tokens if token.strip()]
                 self.list.extend(tokens)
 
@@ -40,7 +40,7 @@ class JackTokenizer:
             return "KEYWORD"
         elif actualToken in self.symbols:
             return "SYMBOL"
-        elif actualToken.startswith(string.digits):
+        elif actualToken.isdigit():
             return "INT_CONST"
         elif actualToken.startswith('"'):
             return "STRING_CONST"
@@ -54,10 +54,10 @@ class JackTokenizer:
         return f"<symbol> {token} </symbol>"
 
     def intVal(self, token):
-        return f"<intVal> {token} </intVal>"
+        return f"<intConst> {token} </intConst>"
 
     def stringVal(self, token):
-        return f"<stringVal> {token} </stringVal>"
+        return f"<stringConst> {token} </stringConst>"
     
     def identifier(self, token):
         return f"<identifier> {token} </identifier>"
