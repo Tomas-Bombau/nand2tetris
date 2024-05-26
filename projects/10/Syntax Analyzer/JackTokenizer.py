@@ -62,26 +62,37 @@ class JackTokenizer:
     def identifier(self, token):
         return f"<identifier> {token} </identifier>"
     
-    def writeLine(self, input):
+    def writeLine(self, content):
         directory = os.path.dirname(self.filePath)
-        xml_file_path = os.path.join(directory, f"{self.title.replace('.jack', 'T.asd')}")
+        xml_file_path = os.path.join(directory, f"{self.title.replace('.jack', 'T.xml')}")
         with open(xml_file_path, "a") as xmlFile:
-            xmlFile.write(f"{input}\n")
+            xmlFile.write(content)
+
+    def writeInit(self):
+        self.writeLine("<tokens>\n")
+
+    def writeToken(self, input):
+        self.writeLine(f"{input}\n")
+
+    def writeEnd(self):
+        self.writeLine("</tokens>")
 
     def writeXml(self):
         self.read()
+        self.writeInit()
         while self.hasMoreTokens():
             token = self.list[self.actualToken]
             tokenType = self.tokenType()
             if tokenType == "KEYWORD":
-                self.writeLine(self.keyword(token))
+                self.writeToken(self.keyword(token))
             elif tokenType == "SYMBOL":
-                self.writeLine(self.symbol(token))
+                self.writeToken(self.symbol(token))
             elif tokenType == "INT_CONST":
-                self.writeLine(self.intVal(token))
+                self.writeToken(self.intVal(token))
             elif tokenType == "STRING_CONST":
-                self.writeLine(self.stringVal(token))
+                self.writeToken(self.stringVal(token))
             elif tokenType == "IDENTIFIER":
-                self.writeLine(self.identifier(token))
+                self.writeToken(self.identifier(token))
             self.advance()
+        self.writeEnd()
     

@@ -4,14 +4,58 @@ from pathlib import Path
 from JackTokenizer import JackTokenizer
 
 
+class Tokenizer():
+    def __init__(self):
+        self.tokenizer()
+
+    def tokenizer(self):
+        parser = argparse.ArgumentParser(prog='JackCompiler', description='Compiler')
+        parser.add_argument('filename', help='Path to .jack file or directory containing .jack files')
+        args = parser.parse_args()
+        path = args.filename
+        if os.path.isfile(path) and path.endswith(".jack"):
+            self.tokenizeFile(path)
+        elif os.path.isdir(path):
+            self.tokenizeDirectory(path)
+        else:
+            print("Invalid input. Please provide a .jack file or directory containing .jack files.")
+
+    def tokenizeFile(self, filePath):
+        JackTokenizer(filePath)
+
+    def tokenizeDirectory(self, directoryPath):
+        for fileName in os.listdir(directoryPath):
+            if fileName.endswith(".jack"):
+                fullPath = os.path.join(directoryPath, fileName)
+                self.tokenizeFile(fullPath)
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='JackCompiler', description='Compiler')
-    parser.add_argument('filename')
-    path = parser.parse_args().filename
-    if path.endswith(".jack"):
-        JackTokenizer(path)
-    else:
-        for jackFiles in os.listdir(path):
-            if jackFiles.endswith(".jack"):
-                full_path = os.path.join(path, jackFiles)
-                JackTokenizer(full_path)
+    Tokenizer()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(prog='JackCompiler', description='Compiler')
+#     parser.add_argument('filename')
+#     path = parser.parse_args().filename
+#     if path.endswith(".jack"):
+#         JackTokenizer(path)
+#     else:
+#         for jackFiles in os.listdir(path):
+#             if jackFiles.endswith(".jack"):
+#                 full_path = os.path.join(path, jackFiles)
+#                 JackTokenizer(full_path)
