@@ -1,4 +1,6 @@
 import argparse
+import os
+from pathlib import Path
 from JackTokenizer import JackTokenizer
 
 
@@ -7,6 +9,9 @@ if __name__ == '__main__':
     parser.add_argument('filename')
     path = parser.parse_args().filename
     if path.endswith(".jack"):
-        newFile = JackTokenizer(path)
+        JackTokenizer(path)
     else:
-        print("DIRECTORIO")
+        for jackFiles in os.listdir(path):
+            if jackFiles.endswith(".jack"):
+                full_path = os.path.join(path, jackFiles)
+                JackTokenizer(full_path)

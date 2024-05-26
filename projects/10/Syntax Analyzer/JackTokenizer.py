@@ -1,9 +1,11 @@
 import re
 import string
+import os
 
 class JackTokenizer:
     def __init__(self, file):
         self.filePath = file
+        self.title = file.split("/")[-1]
         self.list = []
         self.keywords = ['class', 'constructor', 'function', 'method', 'field', 'static', 'var', 'int', 'char', 'boolean', 'void', 'true', 'false', 'null', 'this', 'let', 'do', 'if', 'else', 'while', 'return']
         self.symbols = ['{','}','[',']','(',')','.',',',';','+','-','*','/','&','|','<','>','=','~']
@@ -61,7 +63,9 @@ class JackTokenizer:
         return f"<identifier> {token} </identifier>"
     
     def writeLine(self, input):
-        with open(f"PRUEBA.xml", "a") as xmlFile:
+        directory = os.path.dirname(self.filePath)
+        xml_file_path = os.path.join(directory, f"{self.title.replace('.jack', 'T.asd')}")
+        with open(xml_file_path, "a") as xmlFile:
             xmlFile.write(f"{input}\n")
 
     def writeXml(self):
