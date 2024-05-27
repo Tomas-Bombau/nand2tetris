@@ -10,7 +10,7 @@ class JackTokenizer:
         self.keywords = ['class', 'constructor', 'function', 'method', 'field', 'static', 'var', 'int', 'char', 'boolean', 'void', 'true', 'false', 'null', 'this', 'let', 'do', 'if', 'else', 'while', 'return']
         self.symbols = ['{','}','[',']','(',')','.',',',';','+','-','*','/','&','|','<','>','=','~']
         self.actualToken = 0
-        self.writeXml()
+        self.allTokens()
 
     def read(self):
         with open(self.filePath, "r") as infile:
@@ -73,47 +73,30 @@ class JackTokenizer:
     def identifier(self, token):
         return f"<identifier> {token} </identifier>"
     
-    def writeLine(self, content):
-        directory = os.path.dirname(self.filePath)
-        xml_file_path = os.path.join(directory, f"{self.title.replace('.jack', 'T.xml')}")
-        with open(xml_file_path, "a") as xmlFile:
-            xmlFile.write(content)
-
-    def writeInit(self):
-        self.writeLine("<tokens>\n")
-
-    def writeToken(self, input):
-        self.writeLine(f"{input}\n")
-
-    def writeEnd(self):
-        self.writeLine("</tokens>")
-
-    def writeXml(self):
+    def allTokens(self):
         self.read()
-        self.writeInit()
         while self.hasMoreTokens():
             token = self.list[self.actualToken]
             tokenType = self.tokenType()
             if tokenType == "KEYWORD":
-                self.writeToken(self.keyword(token))
+                self.keyword(token)
             elif tokenType == "SYMBOL":
                 if token == "<":
-                    self.writeToken(self.symbol("&lt;"))
+                    self.symbol("&lt;")
                 elif token == ">":
-                    self.writeToken(self.symbol("&gt;"))
+                    self.symbol("&gt;")
                 elif token == "\"":
-                    self.writeToken(self.symbol("&quot;"))
+                    self.symbol("&quot;")
                 elif token == "&":
-                    self.writeToken(self.symbol("&amp;"))
+                    self.symbol("&amp;")
                 else:
-                    self.writeToken(self.symbol(token))
+                    self.symbol(token)
             elif tokenType == "INT_CONST":
-                self.writeToken(self.intVal(token))
+                self.intVal(token)
             elif tokenType == "STRING_CONST":
                 token = token.replace("\"","")
-                self.writeToken(self.stringVal(token))
+                self.stringVal(token)
             elif tokenType == "IDENTIFIER":
-                self.writeToken(self.identifier(token))
+                self.identifier(token)
             self.advance()
-        self.writeEnd()
     
