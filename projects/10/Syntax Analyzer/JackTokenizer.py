@@ -14,13 +14,24 @@ class JackTokenizer:
 
     def read(self):
         with open(self.filePath, "r") as infile:
-            for lines in infile:
-                lines = lines.strip()
-                lines = re.sub(r"(\/\/.*|\/\*[\s\S]*?\*\/)", '', lines)
-                lines = re.sub(r'([()\{\};.])', r' \1 ', lines)
-                tokens = re.split(r'(\s+|[()\{\};,])', lines)
-                tokens = [token for token in tokens if token.strip()]
-                self.list.extend(tokens)
+            in_comment = False
+            for line in infile:
+                line = line.strip()
+                if '/*' in line:
+                    in_comment = True
+                    if '*/' in line:
+                        line = re.sub(r'/\*.*\*/', '', line)
+                        in_comment = False
+                    else:
+                        line = re.sub(r'/\*.*', '', line)
+                elif '*/' in line:
+                    in_comment = False
+                    line = re.sub(r'.*\*/', '', line)
+                if in_comment:
+                    continue 
+                line = re.sub(r"//.*", '', line)
+                tokens = re.split(r'(\s+|[()\{\};,.\[\]+\-*/&|<>=~]|"(?:\\.|[^"])*")', line)
+                self.list.extend(token for token in tokens if token.strip())
 
     def hasMoreTokens(self):
         if self.actualToken > len(self.list) - 1:
@@ -54,10 +65,10 @@ class JackTokenizer:
         return f"<symbol> {token} </symbol>"
 
     def intVal(self, token):
-        return f"<intConst> {token} </intConst>"
+        return f"<integerConstant> {token} </integerConstant>"
 
     def stringVal(self, token):
-        return f"<stringConst> {token} </stringConst>"
+        return f"<stringConstant> {token} </stringConstant>"
     
     def identifier(self, token):
         return f"<identifier> {token} </identifier>"
@@ -86,10 +97,20 @@ class JackTokenizer:
             if tokenType == "KEYWORD":
                 self.writeToken(self.keyword(token))
             elif tokenType == "SYMBOL":
-                self.writeToken(self.symbol(token))
+                if token == "<":
+                    self.writeToken(self.symbol("&lt;"))
+                elif token == ">":
+                    self.writeToken(self.symbol("&gt;"))
+                elif token == "\"":
+                    self.writeToken(self.symbol("&quot;"))
+                elif token == "&":
+                    self.writeToken(self.symbol("&amp;"))
+                else:
+                    self.writeToken(self.symbol(token))
             elif tokenType == "INT_CONST":
                 self.writeToken(self.intVal(token))
             elif tokenType == "STRING_CONST":
+                token = token.replace("\"","")
                 self.writeToken(self.stringVal(token))
             elif tokenType == "IDENTIFIER":
                 self.writeToken(self.identifier(token))
