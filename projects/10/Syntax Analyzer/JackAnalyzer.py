@@ -33,7 +33,8 @@ class Tokenizer():
 if __name__ == '__main__':
     start = Tokenizer().new
     for tokenizer in start:
-        CompilationEngine(tokenizer)
+        newFile = CompilationEngine(tokenizer)
+        newFile.CompileClass()
 
 
 

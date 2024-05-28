@@ -3,7 +3,6 @@ class CompilationEngine:
         self.tokenizer = tokenizer
         self.outputFile = open(f"{self.tokenizer.filePath.replace(".jack", ".xml")}", "a")
         self.opList = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
-        self.CompileClass()
 
     def CompileClass(self):
         self.outputFile.write("<class>\n")
