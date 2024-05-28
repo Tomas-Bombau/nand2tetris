@@ -1,7 +1,7 @@
 class CompilationEngine:
     def __init__(self, tokenizer):
         self.tokenizer = tokenizer
-        self.outputFile = open(f"{self.tokenizer.filePath.replace(".jack", ".xml")}", "w+")
+        self.outputFile = open(f"{self.tokenizer.filePath.replace(".jack", ".xml")}", "a")
         self.opList = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
         self.CompileClass()
 
@@ -284,6 +284,5 @@ class CompilationEngine:
         self.tokenizer.advance()
 
     def writeStrConst(self):
-        print(self.tokenizer.actualToken)
         self.outputFile.write(f"<stringConstant> {self.tokenizer.actualToken.replace("\"", "")} </stringConstant>\n")
         self.tokenizer.advance()
