@@ -33,7 +33,8 @@ class Tokenizer():
 if __name__ == '__main__':
     start = Tokenizer().new
     for tokenizer in start:
-        newFile = CompilationEngine(tokenizer)
+        outputFile = tokenizer.filePath.replace(".jack", ".xml")
+        newFile = CompilationEngine(tokenizer, outputFile)
         newFile.CompileClass()
 
 

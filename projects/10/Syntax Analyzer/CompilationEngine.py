@@ -1,7 +1,7 @@
 class CompilationEngine:
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer, outputFile):
         self.tokenizer = tokenizer
-        self.outputFile = open(f"{self.tokenizer.filePath.replace(".jack", ".xml")}", "a")
+        self.outputFile = open(outputFile, "a")
         self.opList = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
     def CompileClass(self):
