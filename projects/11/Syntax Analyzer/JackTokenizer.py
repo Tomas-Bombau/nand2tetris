@@ -44,6 +44,10 @@ class JackTokenizer:
         self.tokenIndex += 1
         self.hasMoreTokens()
 
+    def goBack(self):
+        self.tokenIndex -= 1
+        self.hasMoreTokens()
+
     def tokenType(self):
         if self.actualToken in self.keywords:
             return "KEYWORD"

@@ -8,13 +8,14 @@ class CompilationEngine:
         self.symbolTable = SymbolTable()
         self.className = ""
         self.subroutineName = ""
+        self.subroutineTypeOrClassName = ""
         self.opList = ["+", "-", "*", "/", "&", "|", "<", ">", "="]
 
     def CompileClass(self):
         self.tokenizer.advance() # get class Name
         self.className = self.tokenizer.actualToken
         while self.tokenizer.hasMoreTokens():
-            self.tokenizer.advance()  # get "{"
+            self.tokenizer.advance()  # get "Global vars" or subroutines
             while self.tokenizer.actualToken == "static" or self.tokenizer.actualToken == "field":
                 self.CompileClassVarDec()
                 self.tokenizer.advance() # move to subroutine type / 'constructor' or 'method' or 'function'
@@ -40,12 +41,12 @@ class CompilationEngine:
             self.tokenizer.advance()
 
     def CompileSubroutineDec(self):
-        subroutineType = self.tokenizer.actualToken
+        subroutineType = self.tokenizer.actualToken #METHOD, FUNCTION OR CONSTRUCTOR
         self.tokenizer.advance()  # get subroutine type or name
-        subroutineTypeOrName = self.tokenizer.actualToken
+        self.subroutineTypeOrClassName = self.tokenizer.actualToken
         self.tokenizer.advance()  # get subroutine type or name
         self.subroutineName = self.tokenizer.actualToken
-        self.symbolTable.startSubroutine()
+        self.symbolTable.startSubroutine() # Clean symbol table
         self.tokenizer.advance()  # move to '(' symbol
         self.compileParameterList(subroutineType)
         self.tokenizer.advance()  # move to '{' symbol
@@ -113,33 +114,27 @@ class CompilationEngine:
                 self.compileReturn()
 
     def compileLet(self):
+        isArray = False
         self.tokenizer.advance()
         name = self.tokenizer.actualToken
         self.tokenizer.advance()
-        self.tokenizer.advance()
-        self.compileSubroutineCall()
-        if self.symbolTable.KindOf(name) == "var":
-            segment = "local"
+        if self.tokenizer.actualToken == "[":  # case of varName[expression]
+            isArray = True
+            self.compileArrayIndex(name)
+        self.tokenizer.advance() 
+        self.CompileExpression()
+        if isArray:
+            self.outputFile.writePop("temp", 0)
+            self.outputFile.writePop("pointer", 1)
+            self.outputFile.writePush("temp", 0)
+            self.outputFile.writePop("that", 0)
         else:
-            segment = "arg"
-        index = self.symbolTable.IndexOf(name)
-        self.outputFile.WritePop(segment, index)
-
-        # #WRITE LET
-        # self.writeKeyword()
-        # #WRITE VARNAME
-        # self.writeIdentifier()
-        # #WRITE CONDITIONAL [
-        # if self.tokenizer.actualToken == "[":
-        #     self.writeSymbol()
-        #     self.CompileExpression()
-        #     self.writeSymbol()
-        # #WRITE "=""
-        # self.writeSymbol()
-        # #WRITE EXPRESSION
-        # self.CompileExpression()
-        # #WRITE ";"
-        # self.writeSymbol()
+            if self.symbolTable.KindOf(name) == "var":
+                segment = "local"
+            else:
+                segment = "arg"
+            index = self.symbolTable.IndexOf(name)
+            self.outputFile.WritePop(segment, index)
 
     # def compileIf(self):
     #     self.outputFile.write("  " * self.indentation + "<ifStatement>\n")
@@ -194,7 +189,8 @@ class CompilationEngine:
     def compileDo(self):
         self.tokenizer.advance()
         self.compileSubroutineCall()
-        self.outputFile.WritePop('temp', 0) #! A CHEQUEAR
+        self.outputFile.WritePop('temp', 0)
+        self.tokenizer.advance()
 
     def compileSubroutineCall(self):
         name = lastName = fullName = ''
@@ -214,15 +210,18 @@ class CompilationEngine:
             self.outputFile.WritePush('pointer', 0)
             nLocals += 1
             fullName = self.className + '.' + name
-        self.tokenizer.advance() 
+        self.tokenizer.advance()
         nLocals += self.CompileExpressionList()
         self.outputFile.writeCall(fullName, nLocals)
-        self.tokenizer.advance()  
+        self.tokenizer.advance()
 
     def compileReturn(self):
-        self.outputFile.writeReturn()
-        if self.tokenizer.tokenType() != "SYMBOL":
+        while self.tokenizer.tokenType() != "SYMBOL":
             self.CompileExpression()
+        if self.subroutineTypeOrClassName:
+            self.outputFile.WritePush('constant', 0)
+            self.subroutineTypeOrClassName = ""
+        self.outputFile.writeReturn()       
 
     def CompileExpression(self):
         self.CompileTerm()
@@ -261,7 +260,6 @@ class CompilationEngine:
                 self.tokenizer.advance()
                 self.CompileExpression()
                 counter += 1
-        self.tokenizer.advance()
         return counter
         
     def CompileTerm(self):
@@ -279,35 +277,32 @@ class CompilationEngine:
         elif self.tokenizer.tokenType() == "IDENTIFIER":
             nLocals = 0
             name = self.tokenizer.actualToken  # get class/var/func name
+            self.tokenizer.advance()
             #VARNAME[ARRAY]
             if self.tokenizer.actualToken == "[":
                 array = True
                 self.compileArrayIndex(name)
-             #SUBROUTINECALL
-            # elif self.tokenizer.actualToken == ".":
-            #     self.tokenizer.advance() 
-            #     lastName = self.tokenizer.actualToken  # get subroutine name
-            #     if name in self.symbolTable.globalScope or name in self.symbolTable.subroutineScope:
-            #         self.outputFile.writePush(name, lastName)
-            #         fullName = self.symbolTable.typeOf(name) + '.' + lastName
-            #         nLocals += 1
-            #     else:
-            #         fullName = name + '.' + lastName
-            #     self.outputFile.WritePush('pointer', 0)
-            #     nLocals += 1
-            #     fullName = self.className + '.' + name
-            #     self.tokenizer.advance() 
-            #     nLocals += self.CompileExpressionList()
-            #     self.outputFile.writeCall(fullName, nLocals)
-            #     self.tokenizer.advance()
-             #SUBROUTINECALL
-            # elif self.tokenizer.actualToken == "(":
-            #     nLocals += 1
-            #     self.outputFile.writePush('pointer', 0)
-            #     self.tokenizer.advance()  # get '(' symbol
-            #     nLocals += self.compileExpressionList()
-            #     self.tokenizer.advance()  # get ')' symbol
-            #     self.outputFile.writeCall(self.className + '.' + name, nLocals)
+            #SUBROUTINECALL
+            elif self.tokenizer.actualToken == ".":
+                self.tokenizer.advance() 
+                lastName = self.tokenizer.actualToken  # get subroutine name
+                if name in self.symbolTable.globalScope or name in self.symbolTable.subroutineScope:
+                    self.outputFile.writePush(name, lastName)
+                    name = self.symbolTable.typeOf(name) + '.' + lastName
+                    nLocals += 1
+                else:
+                    name = name + '.' + lastName
+                self.tokenizer.advance()  # get '(' symbol
+                nLocals += self.CompileExpressionList()
+                self.outputFile.writeCall(name, nLocals)
+                self.tokenizer.advance()
+            #SUBROUTINECALL
+            elif self.tokenizer.actualToken == "(":
+                nLocals += 1
+                self.outputFile.writePush('pointer', 0)
+                self.tokenizer.advance()  # get '(' symbol
+                nLocals += self.CompileExpressionList()
+                self.outputFile.writeCall(self.className + '.' + name, nLocals)
             else:
                 if array:
                     self.outputFile.WritePopritePop('pointer', 1)
@@ -317,6 +312,7 @@ class CompilationEngine:
                         self.outputFile.WritePush('local', self.symbolTable.IndexOf(name))
                     elif self.symbolTable.KindOf(name) == 'arg':
                         self.outputFile.WritePush('argument', self.symbolTable.IndexOf(name))
+                    self.tokenizer.goBack()
                 else:
                     if self.symbolTable.KindOf(name) == 'static':
                         self.outputFile.WritePush('static', self.symbolTable.IndexOf(name))
@@ -326,7 +322,6 @@ class CompilationEngine:
         elif self.tokenizer.tokenType() == "SYMBOL" and self.tokenizer.actualToken == "(":
             self.tokenizer.advance()
             self.CompileExpression()
-            self.tokenizer.advance()
         #UNARYOP
         elif self.tokenizer.actualToken == "~" or self.tokenizer.actualToken == "-":
             op = self.tokenizer.actualToken
